@@ -10,7 +10,7 @@ else:
     router = SimpleRouter()
 
 router.register("users", UserViewSet)
-router.register(r"lands", LandViewSet)
+router.register("lands", LandViewSet)
 
 
 app_name = "api"
