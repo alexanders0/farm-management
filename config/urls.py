@@ -15,7 +15,7 @@ schema_view = get_schema_view(
    openapi.Info(
       title="Farm-management",
       default_version='v1',
-      description="Here is the API documentation for the farm management backend code..",
+      description="Here is the API documentation for the farm management backend code.",
       terms_of_service="https://www.google.com/policies/terms/",
       contact=openapi.Contact(email="contact@snippets.local"),
       license=openapi.License(name="BSD License"),
@@ -25,14 +25,14 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
+    # path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
     path(
         "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
     ),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
-    path("users/", include("farm_management.users.urls", namespace="users")),
+    # path("users/", include("farm_management.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
 
