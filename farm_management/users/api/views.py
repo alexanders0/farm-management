@@ -9,7 +9,8 @@ from rest_framework.response import Response
 from .serializers import (
     UserModelSerializer,
     UserSignUpSerializer,
-    AccountVerificationSerializer
+    AccountVerificationSerializer,
+    UserLoginSerializer
 )
 
 # Models
@@ -39,6 +40,8 @@ class UserViewSet(mixins.RetrieveModelMixin,
             return UserSignUpSerializer
         if self.action == 'verify':
             return AccountVerificationSerializer
+        if self.action == 'login':
+            return UserLoginSerializer
         return UserModelSerializer
 
     @action(detail=False, methods=['post'])
@@ -63,7 +66,16 @@ class UserViewSet(mixins.RetrieveModelMixin,
         data = {'message': 'Congratulation, now go and manage farms!'}
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=["GET"])
-    def me(self, request):
-        serializer = UserModelSerializer(request.user, context={"request": request})
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+    @action(detail=False, methods=['post'])
+    def login(self, request):
+        """User login."""
+
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user, token = serializer.save()
+        data = {
+            'user': UserModelSerializer(user).data,
+            'token': token
+        }
+        return Response(data, status=status.HTTP_201_CREATED)

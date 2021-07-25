@@ -4,7 +4,6 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
-from rest_framework.authtoken.views import obtain_auth_token
 
 # drf_yasg
 from rest_framework import permissions
@@ -46,8 +45,6 @@ urlpatterns = [
 urlpatterns += [
     # API base url
     path("", include("config.api_router")),
-    # DRF auth token
-    path("auth-token/", obtain_auth_token),
 ]
 
 if settings.DEBUG:
