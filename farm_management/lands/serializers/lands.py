@@ -20,6 +20,7 @@ class LandModelSerializer(serializers.ModelSerializer):
 
         model = Land
         fields = (
+            'id',
             'name',
             'manager',
             'location'
