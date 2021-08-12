@@ -5,6 +5,7 @@ from rest_framework.permissions import BasePermission
 
 # Models
 from farm_management.animals.models import Animal
+from farm_management.lands.models import Land
 
 
 class IsLandOwner(BasePermission):
@@ -13,12 +14,12 @@ class IsLandOwner(BasePermission):
     def has_permission(self, request, view):
         """Verify requesting user is the land creator."""
 
-        animals = Animal.objects.filter(
-            land__manager=request.user,
-            land=view.land
-        )
-
-        if not animals:
+        try:
+            Land.objects.get(
+                id=view.land.pk,
+                manager=request.user
+            )
+        except Land.DoesNotExist:
             return False
         return True
 
