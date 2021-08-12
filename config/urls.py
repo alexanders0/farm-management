@@ -11,16 +11,16 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
 schema_view = get_schema_view(
-   openapi.Info(
-      title="Farm-management",
-      default_version='v1',
-      description="Here is the API documentation for the farm management backend code.",
-      terms_of_service="https://www.google.com/policies/terms/",
-      contact=openapi.Contact(email="contact@snippets.local"),
-      license=openapi.License(name="BSD License"),
-   ),
-   public=True,
-   permission_classes=[permissions.AllowAny],
+    openapi.Info(
+        title="Farm-management",
+        default_version='v1',
+        description="Here is the API documentation for the farm management backend code.",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@snippets.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=[permissions.AllowAny],
 )
 
 urlpatterns = [
@@ -45,6 +45,7 @@ urlpatterns = [
 urlpatterns += [
     # API base url
     path("", include("config.api_router")),
+    path('', include(('farm_management.animals.urls', 'animals'), namespace='animals'))
 ]
 
 if settings.DEBUG:

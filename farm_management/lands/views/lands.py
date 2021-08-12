@@ -23,7 +23,7 @@ class LandViewSet(mixins.CreateModelMixin,
                   mixins.ListModelMixin,
                   mixins.DestroyModelMixin,
                   viewsets.GenericViewSet):
-    """Land view set"""
+    """Land view set."""
 
     def get_queryset(self):
         """Restrict list to lands created by the requesting user."""

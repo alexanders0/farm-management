@@ -78,6 +78,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "farm_management.users.apps.UsersConfig",
     "farm_management.lands.apps.LandsConfig",
+    "farm_management.animals.apps.AnimalsConfig",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
