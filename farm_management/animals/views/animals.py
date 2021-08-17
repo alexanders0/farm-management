@@ -3,6 +3,7 @@
 # Django REST Framework
 from rest_framework import mixins, viewsets
 from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import MultiPartParser
 
 # Django
 from django.utils.decorators import method_decorator
@@ -37,6 +38,7 @@ class AnimalViewSet(mixins.CreateModelMixin,
     """Animal view set."""
 
     serializer_class = AnimalModelSerializer
+    parser_classes = (MultiPartParser,)
 
     def dispatch(self, request, *args, **kwargs):
         """Verify that the land exists."""

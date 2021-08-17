@@ -1,8 +1,7 @@
 from django.conf import settings
 from rest_framework.routers import DefaultRouter, SimpleRouter
 
-from farm_management.users.api.views import UserViewSet
-from farm_management.lands.views import LandViewSet
+from farm_management.users.views import UserViewSet
 
 if settings.DEBUG:
     router = DefaultRouter()
@@ -10,7 +9,6 @@ else:
     router = SimpleRouter()
 
 router.register("users", UserViewSet)
-router.register("lands", LandViewSet, basename="land")
 
 
 app_name = "api"

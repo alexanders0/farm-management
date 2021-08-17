@@ -4,9 +4,19 @@
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser
+
+# Permissions
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated
+)
+from farm_management.users.permissions import IsAccountOwner
 
 # Serializers
-from .serializers import (
+from farm_management.users.serializers.profiles import ProfileModelSerializer
+from farm_management.lands.serializers import LandModelSerializer
+from farm_management.users.serializers import (
     UserModelSerializer,
     UserSignUpSerializer,
     AccountVerificationSerializer,
@@ -15,6 +25,7 @@ from .serializers import (
 
 # Models
 from django.contrib.auth import get_user_model
+from farm_management.lands.models import Land
 
 User = get_user_model()
 
@@ -27,11 +38,19 @@ class UserViewSet(mixins.RetrieveModelMixin,
     Handle sign up, login and account verification.
     """
     serializer_class = UserModelSerializer
-    queryset = User.objects.all()
+    queryset = User.objects.filter(is_active=True)
     lookup_field = "username"
 
-    def get_queryset(self, *args, **kwargs):
-        return self.queryset.filter(id=self.request.user.id)
+    def get_permissions(self):
+        """Assign permissions based on action."""
+
+        if self.action in ['signup', 'login', 'verify']:
+            permissions = [AllowAny]
+        elif self.action in ['retrieve', 'update', 'partial_update', 'profile']:
+            permissions = [IsAuthenticated, IsAccountOwner]
+        else:
+            permissions = [IsAuthenticated]
+        return [permission() for permission in permissions]
 
     def get_serializer_class(self):
         """Return serializer based on action."""
@@ -79,3 +98,32 @@ class UserViewSet(mixins.RetrieveModelMixin,
             'token': token
         }
         return Response(data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['put', 'patch'], parser_classes=(MultiPartParser, ))
+    def profile(self, request, *args, **kwargs):
+        """Update profile data."""
+
+        user = self.get_object()
+        profile = user.profile
+        partial = request.method == 'PATCH'
+        serializer = ProfileModelSerializer(
+            profile,
+            data=request.data,
+            partial=partial
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        data = UserModelSerializer(user).data
+        return Response(data)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Add extra data to the response."""
+
+        response = super(UserViewSet, self).retrieve(request, *args, **kwargs)
+        lands = Land.objects.filter(manager=request.user)
+        data = {
+            'user': response.data,
+            'lands': LandModelSerializer(lands, many=True).data
+        }
+        response.data = data
+        return response

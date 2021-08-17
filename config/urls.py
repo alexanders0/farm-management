@@ -45,6 +45,7 @@ urlpatterns = [
 urlpatterns += [
     # API base url
     path("", include("config.api_router")),
+    path('', include(('farm_management.lands.urls', 'lands'), namespace='lands')),
     path('', include(('farm_management.animals.urls', 'animals'), namespace='animals'))
 ]
 

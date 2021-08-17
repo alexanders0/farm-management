@@ -12,9 +12,13 @@ from rest_framework.validators import UniqueValidator
 
 # Models
 from django.contrib.auth import get_user_model
+from farm_management.users.models import Profile
 
 # Tasks
 from farm_management.users.tasks import send_confirmation_email
+
+# Serializers
+from farm_management.users.serializers.profiles import ProfileModelSerializer
 
 # Utilities
 import jwt
@@ -25,6 +29,8 @@ User = get_user_model()
 class UserModelSerializer(serializers.ModelSerializer):
     """User model serializer."""
 
+    profile = ProfileModelSerializer(read_only=True)
+
     class Meta:
         """Meta class."""
 
@@ -33,7 +39,8 @@ class UserModelSerializer(serializers.ModelSerializer):
             "username",
             "name",
             "email",
-            "phone_number"
+            "phone_number",
+            "profile"
         )
 
         extra_kwargs = {
@@ -44,7 +51,7 @@ class UserModelSerializer(serializers.ModelSerializer):
 class UserSignUpSerializer(serializers.Serializer):
     """ User sign up serializer
 
-    Handle sign up data validation and user creation.
+    Handle sign up data validation and user/profile creation.
     """
 
     username = serializers.CharField(
@@ -86,6 +93,7 @@ class UserSignUpSerializer(serializers.Serializer):
 
         data.pop('password_confirmation')
         user = User.objects.create_user(**data, is_verified=False)
+        Profile.objects.create(user=user)
         send_confirmation_email.delay(user_pk=user.pk)
         return user
 

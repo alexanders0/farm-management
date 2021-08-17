@@ -14,14 +14,14 @@ from farm_management.animals.models import Animal
 class AnimalModelSerializer(serializers.ModelSerializer):
     """Animal model serializer."""
 
-    land = LandModelSerializer(read_only=True)
+    # land = LandModelSerializer(read_only=True)
 
     class Meta:
         """Meta class."""
 
         model = Animal
         exclude = ('created', 'modified')
-        read_only_fields = ('land',)
+        # read_only_fields = ('land',)
 
 
 class CreateAnimalSerializer(serializers.ModelSerializer):

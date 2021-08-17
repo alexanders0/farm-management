@@ -4,7 +4,7 @@
 from rest_framework import serializers
 
 # Serializers
-from farm_management.users.api.serializers import UserModelSerializer
+from farm_management.users.serializers import UserModelSerializer
 
 # Model
 from farm_management.lands.models import Land
@@ -13,8 +13,6 @@ from farm_management.lands.models import Land
 class LandModelSerializer(serializers.ModelSerializer):
     """Land model serializer."""
 
-    manager = UserModelSerializer(read_only=True)
-
     class Meta:
         """Meta class."""
 
@@ -22,7 +20,6 @@ class LandModelSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
-            'manager',
             'location'
         )
 
