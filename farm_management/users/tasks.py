@@ -54,7 +54,7 @@ def send_confirmation_email(user_pk, current_site, protocol):
     subject = 'Welcome @{}! Verify your account to start using Farm-management'.format(user.username)
     from_email = 'Farm-management <noreply@farm-management.xyz>'
     content = render_to_string(
-        'emails/users/account_verification1.html',
+        'emails/users/account_verification.html',
         {'abs_url': abs_url, 'user': user}
     )
     msg = EmailMultiAlternatives(subject, content, from_email, [user.email])
