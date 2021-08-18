@@ -73,6 +73,7 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_yasg",
+    "django_inlinecss"
 ]
 
 LOCAL_APPS = [
@@ -310,3 +311,8 @@ REST_FRAMEWORK = {
 CORS_URLS_REGEX = r"^.*$"
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+# INLINECSS_CSS
+# ------------------------------------------------------------------------------
+# https://pypi.org/project/django-inlinecss/
+INLINECSS_CSS_LOADER = 'django_inlinecss.css_loaders.StaticfilesFinderCSSLoader'

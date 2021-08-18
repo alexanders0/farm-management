@@ -1,5 +1,8 @@
 """User views."""
 
+# Django
+from django.conf import settings
+
 # Django REST Framework
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -19,9 +22,11 @@ from farm_management.lands.serializers import LandModelSerializer
 from farm_management.users.serializers import (
     UserModelSerializer,
     UserSignUpSerializer,
-    AccountVerificationSerializer,
     UserLoginSerializer
 )
+
+# Utilities
+import jwt
 
 # Models
 from django.contrib.auth import get_user_model
@@ -57,33 +62,52 @@ class UserViewSet(mixins.RetrieveModelMixin,
 
         if self.action == 'signup':
             return UserSignUpSerializer
-        if self.action == 'verify':
-            return AccountVerificationSerializer
         if self.action == 'login':
             return UserLoginSerializer
         return UserModelSerializer
+
+    def get_serializer_context(self):
+        context = super(UserViewSet, self).get_serializer_context()
+        context.update({'request': self.request})
+        return context
 
     @action(detail=False, methods=['post'])
     def signup(self, request):
         """User sign up."""
 
         serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data)
+        serializer = serializer_class(
+            data=request.data,
+            context=self.get_serializer_context()
+        )
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         data = UserModelSerializer(user).data
         return Response(data, status=status.HTTP_201_CREATED)
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['get'])
     def verify(self, request):
         """Account verification."""
 
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        data = {'message': 'Congratulation, now go and manage farms!'}
-        return Response(data, status=status.HTTP_200_OK)
+        token = request.GET['token']
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
+            user = User.objects.get(username=payload['user'])
+            if not user.is_verified:
+                user.is_verified = True
+                user.save()
+            if payload['type'] != 'email_confirmation':
+                data = {'error': 'Invalid token.'}
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+            data = {'message': 'Congratulation, now go and manage farms!'}
+            return Response(data, status=status.HTTP_200_OK)
+        except jwt.ExpiredSignatureError:
+            data = {'error': 'Verification link has expired.'}
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.PyJWTError:
+            data = {'error': 'Invalid token.'}
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['post'])
     def login(self, request):

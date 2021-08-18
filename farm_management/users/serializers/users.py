@@ -94,37 +94,17 @@ class UserSignUpSerializer(serializers.Serializer):
         data.pop('password_confirmation')
         user = User.objects.create_user(**data, is_verified=False)
         Profile.objects.create(user=user)
-        send_confirmation_email.delay(user_pk=user.pk)
+
+        request = self.context['request']
+        current_site = request.get_host()
+        protocol = 'https://' if request.is_secure() else 'http://'
+        send_confirmation_email.delay(
+            user_pk=user.pk,
+            current_site=current_site,
+            protocol=protocol
+        )
+
         return user
-
-
-class AccountVerificationSerializer(serializers.Serializer):
-    """Account verification serializer."""
-
-    token = serializers.CharField()
-
-    def validate_token(self, data):
-        """Verify token is valid."""
-
-        try:
-            payload = jwt.decode(data, settings.SECRET_KEY, algorithms='HS256')
-        except jwt.ExpiredSignatureError:
-            raise serializers.ValidationError('Verification link has expired.')
-        except jwt.PyJWTError:
-            raise serializers.ValidationError('Invalid token')
-        if payload['type'] != 'email_confirmation':
-            raise serializers.ValidationError('Invalid token')
-
-        self.context['payload'] = payload
-        return data
-
-    def save(self):
-        """Update user's verified status."""
-
-        payload = self.context['payload']
-        user = User.objects.get(username=payload['user'])
-        user.is_verified = True
-        user.save()
 
 
 class UserLoginSerializer(serializers.Serializer):

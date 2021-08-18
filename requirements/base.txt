@@ -24,3 +24,6 @@ drf-yasg==1.20.0
 
 # JWT
 pyjwt==2.0.1
+
+# Django Inlinecss
+django-inlinecss==0.3.0
