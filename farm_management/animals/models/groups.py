@@ -12,11 +12,15 @@ class Group(FarmModel):
 
     name = models.CharField('group name', max_length=100)
     description = models.CharField('group description', max_length=200)
-    location = models.ForeignKey(
+    location = models.OneToOneField(
         'lands.Paddock',
         on_delete=models.SET_NULL,
         null=True,
         blank=True
+    )
+    land = models.ForeignKey(
+        'lands.Land',
+        on_delete=models.CASCADE
     )
 
     def __str__(self):

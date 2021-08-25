@@ -15,6 +15,7 @@ class PaddockModelSerializer(serializers.ModelSerializer):
 
         model = Paddock
         exclude = ('created', 'modified')
+        read_only_fields = ('is_active',)
 
 
 class CreatePaddockSerializer(serializers.ModelSerializer):
@@ -25,6 +26,7 @@ class CreatePaddockSerializer(serializers.ModelSerializer):
 
         model = Paddock
         exclude = ('land', 'created', 'modified')
+        read_only_fields = ('is_active',)
 
     def create(self, data):
         """Create paddock."""
