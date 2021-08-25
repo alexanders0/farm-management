@@ -14,7 +14,7 @@ class AnimalModelSerializer(serializers.ModelSerializer):
         """Meta class."""
 
         model = Animal
-        exclude = ('created', 'modified')
+        fields = '__all__'
 
 
 class CreateAnimalSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class CreateAnimalSerializer(serializers.ModelSerializer):
         """Meta class."""
 
         model = Animal
-        exclude = ('land', 'created', 'modified')
+        exclude = ('land',)
 
     def create(self, data):
         """Create animal."""
