@@ -12,7 +12,7 @@ from rest_framework.validators import UniqueValidator
 
 # Models
 from django.contrib.auth import get_user_model
-from farm_management.users.models import Profile
+from farm_management.users.models import Profile, PhoneCode
 
 # Tasks
 from farm_management.users.tasks import send_confirmation_email
@@ -22,6 +22,9 @@ from farm_management.users.serializers.profiles import ProfileModelSerializer
 
 # Utilities
 import jwt
+from config.settings.base import env
+from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
 
 User = get_user_model()
 
@@ -94,6 +97,7 @@ class UserSignUpSerializer(serializers.Serializer):
         data.pop('password_confirmation')
         user = User.objects.create_user(**data, is_verified=False)
         Profile.objects.create(user=user)
+        phone_code = PhoneCode.objects.create(user=user)
 
         request = self.context['request']
         current_site = request.get_host()
@@ -103,6 +107,23 @@ class UserSignUpSerializer(serializers.Serializer):
             current_site=current_site,
             protocol=protocol
         )
+
+        account_sid = settings.TWILIO_ACCOUNT_SID
+        auth_token = settings.TWILIO_AUTH_TOKEN
+        client = Client(account_sid, auth_token)
+
+        try:
+            message = client.messages.create(
+                body='Please verify your phone number with the following code: ' + phone_code.phone_code,
+                from_=settings.TWILIO_PHONE_NUMBER,
+                to=data['phone_number']
+            )
+        except TwilioRestException as e:
+            raise serializers.ValidationError(
+                """The phone number is unverified. Trial accounts cannot send messages to unverified numbers;
+                verify  at twilio.com/user/account/phone-numbers/verified, or purchase a Twilio number
+                to send messages to unverified numbers."""
+            )
 
         return user
 
@@ -132,3 +153,34 @@ class UserLoginSerializer(serializers.Serializer):
 
         token, created = Token.objects.get_or_create(user=self.context['user'])
         return self.context['user'], token.key
+
+
+class VerifyPhoneSerializer(serializers.ModelSerializer):
+    """Verify phone serializer."""
+
+    phone_code = serializers.CharField(max_length=5)
+
+    class Meta:
+        """Meta class."""
+
+        model = PhoneCode
+        fields = ('phone_code',)
+
+    def validate(self, data):
+        """Verify phone code."""
+
+        user = self.context['user']
+        phone = PhoneCode.objects.get(user=user)
+        if phone.phone_code != data['phone_code']:
+            raise serializers.ValidationError('Phone code is not valid')
+        if phone.is_verified is True:
+            raise serializers.ValidationError('Phone code is already verified')
+        self.context['user'] = user
+        return data
+
+    def save(self):
+        """Update phone's verified status."""
+
+        phone = PhoneCode.objects.get(user=self.context['user'])
+        phone.is_verified = True
+        phone.save()

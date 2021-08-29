@@ -316,3 +316,10 @@ CORS_URLS_REGEX = r"^.*$"
 # ------------------------------------------------------------------------------
 # https://pypi.org/project/django-inlinecss/
 INLINECSS_CSS_LOADER = 'django_inlinecss.css_loaders.StaticfilesFinderCSSLoader'
+
+# TWILIO
+# ------------------------------------------------------------------------------
+# https://www.twilio.com/docs/sms/send-messages
+TWILIO_ACCOUNT_SID = env('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER')

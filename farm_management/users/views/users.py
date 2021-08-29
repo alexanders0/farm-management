@@ -22,7 +22,8 @@ from farm_management.lands.serializers import LandModelSerializer
 from farm_management.users.serializers import (
     UserModelSerializer,
     UserSignUpSerializer,
-    UserLoginSerializer
+    UserLoginSerializer,
+    VerifyPhoneSerializer
 )
 
 # Utilities
@@ -64,6 +65,8 @@ class UserViewSet(mixins.RetrieveModelMixin,
             return UserSignUpSerializer
         if self.action == 'login':
             return UserLoginSerializer
+        if self.action == 'verify_phone':
+            return VerifyPhoneSerializer
         return UserModelSerializer
 
     def get_serializer_context(self):
@@ -108,6 +111,20 @@ class UserViewSet(mixins.RetrieveModelMixin,
         except jwt.PyJWTError:
             data = {'error': 'Invalid token.'}
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def verify_phone(self, request, *args, **kwargs):
+        """Phone number verification."""
+
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(
+            data=request.data,
+            context={'user': self.get_object()}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        data = {'message': 'Congratulation, you have verified your phone number!'}
+        return Response(data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'])
     def login(self, request):

@@ -27,3 +27,7 @@ pyjwt==2.0.1
 
 # Django Inlinecss
 django-inlinecss==0.3.0
+
+# Twilio
+twilio # https://www.twilio.com/docs/libraries/reference/twilio-python/index.html
+

@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from farm_management.users.forms import UserChangeForm, UserCreationForm
 
 # Models
-from farm_management.users.models import Profile
+from farm_management.users.models import Profile, PhoneCode
 User = get_user_model()
 
 
@@ -25,7 +25,7 @@ class UserAdmin(auth_admin.UserAdmin):
     add_form = UserCreationForm
     fieldsets = (
         (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("name", "email")}),
+        (_("Personal info"), {"fields": ("name", "email", "phone_number", "is_verified")}),
         (
             _("Permissions"),
             {
@@ -65,3 +65,24 @@ class ProfileAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ('created', 'modified')
+
+
+@admin.register(PhoneCode)
+class PhoneCodeAdmin(admin.ModelAdmin):
+    """Profile model admin."""
+
+    list_display = ('user', 'phone_code', 'is_verified')
+    search_fields = ('user__username', 'user__email', 'user__name')
+
+    fieldsets = (
+        ('PhoneCode', {
+            'fields': (
+                ('user', 'phone_code'),
+            )
+        }),
+        ('Metadata', {
+            'fields': (('created', 'modified'),),
+        })
+    )
+
+    readonly_fields = ('user', 'phone_code', 'created', 'modified')
