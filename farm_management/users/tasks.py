@@ -40,7 +40,10 @@ def gen_verification_token(user):
     return token
 
 
-@celery_app.task(name='send_confirmation_email', max_retries=3)
+@celery_app.task(name='send_confirmation_email',
+                 autoretry_for=(User.DoesNotExist,),
+                 retry_backoff=True,
+                 retry_kwargs={'max_retries': 3})
 def send_confirmation_email(user_pk, current_site, protocol):
     """Send account verification link to given user."""
 
